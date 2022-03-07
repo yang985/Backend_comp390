@@ -1,25 +1,45 @@
 from django.shortcuts import render
-
 # Create your views here.
-
 from django.http import JsonResponse
 from django.contrib.auth import authenticate, login, logout, models
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from .forms import RegisterForm
+from django.http import Http404, HttpResponse, HttpResponseForbidden
+import json
+from django.contrib.auth import logout as django_logout
 
 
 @csrf_exempt
 def getUserInfo(request):
-    return HttpResponse('user info.....')
+    if request.META.get("HTTP_COOKIE"):
+        print('having request cookies')
+        print(request.META.get("HTTP_COOKIE"))
+    print(request.session,'----session')
+    print(request.COOKIES,'----cookie')
+    if request.user.is_authenticated:
+        print(request.user)
+        return JsonResponse({
+            'data': {
+                'username': request.user.username,
+                'email': request.user.email,
+            }
+        })
+    else:
+        return HttpResponse('401 Unauthorized',status=403)
 
 
 @csrf_exempt
 def signin(request):
     # get username and password
-    userName = request.POST.get('username')
-    passWord = request.POST.get('password')
-    print(userName, passWord)
+    js_data = json.loads(request.body)
+    print(js_data)
+    # password, username = request.body
+    userName = js_data['username']
+    passWord = js_data['password']
+    type = js_data['type']
+    # print(userName)
+    # print(passWord)
 
     # authenticate by django.auth
     user = authenticate(username=userName, password=passWord)
@@ -31,17 +51,29 @@ def signin(request):
                 login(request, user)
                 # save type of user in session when he is superuser
                 request.session['usertype'] = 'manager'
-                return JsonResponse({'data': 1, 'msg': 'user type: manager'})
+                request.session['is_login'] = True
+                request.session['user1'] = userName
+                print(request.session.session_key)
+                return JsonResponse({'status':'ok','data': 1,'is_admin':1,'sessionid':request.session.session_key, 'msg': 'user type: manager','type':type})
             else:
                 login(request, user)
                 request.session['usertype'] = 'user'
-                return JsonResponse({'data': 2, 'msg': 'user type: user'})
+                request.session['is_login'] = True
+                request.session['user1'] = userName
+                print(request.session.session_key)
+                return JsonResponse({'status':'ok','data': 2,'is_admin':0, 'sessionid':request.session.session_key,'msg': 'user type: user','type':type})
         else:
-            return JsonResponse({'data': 3, 'msg': 'this account isn\'t active'})
+            return JsonResponse({'status':'unknown','data': 3, 'msg': 'this account isn\'t active','type':type})
 
     else:
-        return JsonResponse({'data': 0, 'msg': 'there is a problem with username or password'})
+        return JsonResponse({'status':'error', 'msg': 'there is a problem with username or password','type':type})
 
+
+@csrf_exempt
+def logout(request):
+    django_logout(request)
+    request.session.flush() # 删除一条记录包括(session_key session_data expire_date)三个字段
+    return JsonResponse({'msg':'bye...'})
 
 @csrf_exempt
 def register(request):
@@ -62,13 +94,6 @@ def register(request):
 
             # save user in db
             form.save()
-            # new_user = models.User()
-            # new_user.last_name = last_name
-            # new_user.first_name = first_name
-            # new_user.password = password1
-            # new_user.email= email
-            # new_user.username =username
-            # new_user.save()
             return JsonResponse({'data': 0, 'msg': 'welcome!!!'})
 
         else:
@@ -82,7 +107,7 @@ def register(request):
             # check passwords
             if password1 != password2:
                 message = 'Passwords are different!'
-                return JsonResponse({'data': 1, 'msg': 'passwords are different'})
+                return JsonResponse({'data': 1, 'msg': message})
             else:
                 # check username
                 same_name_user = models.User.objects.filter(username=username)

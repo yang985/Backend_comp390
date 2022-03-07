@@ -2,10 +2,10 @@ import requests
 
 payload = {
     'username': 'yang',
-    'password': '234234423',
+    'password': '79898896sgyzh173',
 }
 
-response = requests.post('http://localhost/users/signin/', data=payload)
+response = requests.post('http://localhost:8000/users/signin/', data=payload)
 
 result = response.json()
 
