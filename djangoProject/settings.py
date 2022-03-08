@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-)h(x376_ey=h0i3_)#b&xgwdws(fs%b)(gv+$mj7&8x3d2e_d!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -45,13 +45,11 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     #new middleware
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
-
 
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -62,16 +60,7 @@ MIDDLEWARE = [
 # csrf setting
 
 CORS_ALLOW_CREDENTIALS = True
-# CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = (
-    'http://127.0.0.1:8000',
-    'http://localhost:*',
-    'http://localhost:8000',
-    'http://localhost:8001',
-    'http://127.0.0.1:8001',
-)
-ALLOWED_HOSTS = ['127.0.0.1','localhost']
-
+CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ALLOW_METHODS = (
     'DELETE',
@@ -82,6 +71,9 @@ CORS_ALLOW_METHODS = (
     'PUT',
     'VIEW',
 )
+
+# SESSION_COOKIE_SAMESITE = None
+# CSRF_COOKIE_SAMESIT = None
 
 CORS_ALLOW_HEADERS = (
     'XMLHttpRequest',

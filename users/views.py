@@ -10,23 +10,28 @@ import json
 from django.contrib.auth import logout as django_logout
 
 
-@csrf_exempt
+# @csrf_exempt
 def getUserInfo(request):
     if request.META.get("HTTP_COOKIE"):
         print('having request cookies')
         print(request.META.get("HTTP_COOKIE"))
-    print(request.session,'----session')
-    print(request.COOKIES,'----cookie')
+        print(request.session,'----session')
+        print(request.COOKIES,'----cookie')
     if request.user.is_authenticated:
         print(request.user)
-        return JsonResponse({
+        response = JsonResponse({
             'data': {
                 'username': request.user.username,
                 'email': request.user.email,
             }
         })
+        # response["Access-Control-Allow-Origin"] = "http://localhost:8001"
+        # response["Access-Control-Allow-Methods"] = "GET,POST"
+        # response["Access-Control-Allow-Headers"] = "Origin,Content-Type,Cookie,Accept,Token"
+        return response
     else:
-        return HttpResponse(JsonResponse({
+
+        response = HttpResponse(JsonResponse({
             'data':{
                 'isLogin':'false',
             },
@@ -34,9 +39,13 @@ def getUserInfo(request):
             'errorMessage':'please login in first',
 
             }),status=403)
+        # response["Access-Control-Allow-Origin"] = "http://localhost:8001"
+        # response["Access-Control-Allow-Methods"] = "GET,POST"
+        # response["Access-Control-Allow-Headers"] = "Origin,Content-Type,Cookie,Accept,Token"
+        return response
 
 
-@csrf_exempt
+# @csrf_exempt
 def signin(request):
     # get username and password
     js_data = json.loads(request.body)
@@ -61,14 +70,22 @@ def signin(request):
                 request.session['is_login'] = True
                 request.session['user1'] = userName
                 print(request.session.session_key)
-                return JsonResponse({'status':'ok','data': 1,'is_admin':1,'msg': 'user type: manager','type':type})
+                response = JsonResponse({'status':'ok','data': 1,'is_admin':1,'msg': 'user type: manager','type':type})
+                # response["Access-Control-Allow-Origin"] = "http://localhost:8001"
+                # response["Access-Control-Allow-Methods"] = "GET,POST"
+                # response["Access-Control-Allow-Headers"] = "Origin,Content-Type,Cookie,Accept,Token"
+                return response
             else:
                 login(request, user)
                 request.session['usertype'] = 'user'
                 request.session['is_login'] = True
                 request.session['user1'] = userName
                 print(request.session.session_key)
-                return JsonResponse({'status':'ok','data': 2,'is_admin':0,'msg': 'user type: user','type':type})
+                response = JsonResponse({'status':'ok','data': 2,'is_admin':0,'msg': 'user type: user','type':type})
+                # response["Access-Control-Allow-Origin"] = "http://localhost:8001"
+                # response["Access-Control-Allow-Methods"] = "GET,POST"
+                # response["Access-Control-Allow-Headers"] = "Origin,Content-Type,Cookie,Accept,Token"
+                return response
         else:
             return JsonResponse({'status':'unknown','data': 3, 'msg': 'this account isn\'t active','type':type})
 
@@ -76,13 +93,13 @@ def signin(request):
         return JsonResponse({'status':'error', 'msg': 'there is a problem with username or password','type':type})
 
 
-@csrf_exempt
+# @csrf_exempt
 def logout(request):
     django_logout(request)
     request.session.flush() # 删除一条记录包括(session_key session_data expire_date)三个字段
     return JsonResponse({'msg':'bye...'})
 
-@csrf_exempt
+# @csrf_exempt
 def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
