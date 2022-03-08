@@ -26,7 +26,14 @@ def getUserInfo(request):
             }
         })
     else:
-        return HttpResponse('401 Unauthorized',status=403)
+        return HttpResponse(JsonResponse({
+            'data':{
+                'isLogin':'false',
+            },
+            'errorCode':'401',
+            'errorMessage':'please login in first',
+
+            }),status=403)
 
 
 @csrf_exempt
@@ -54,14 +61,14 @@ def signin(request):
                 request.session['is_login'] = True
                 request.session['user1'] = userName
                 print(request.session.session_key)
-                return JsonResponse({'status':'ok','data': 1,'is_admin':1,'sessionid':request.session.session_key, 'msg': 'user type: manager','type':type})
+                return JsonResponse({'status':'ok','data': 1,'is_admin':1,'msg': 'user type: manager','type':type})
             else:
                 login(request, user)
                 request.session['usertype'] = 'user'
                 request.session['is_login'] = True
                 request.session['user1'] = userName
                 print(request.session.session_key)
-                return JsonResponse({'status':'ok','data': 2,'is_admin':0, 'sessionid':request.session.session_key,'msg': 'user type: user','type':type})
+                return JsonResponse({'status':'ok','data': 2,'is_admin':0,'msg': 'user type: user','type':type})
         else:
             return JsonResponse({'status':'unknown','data': 3, 'msg': 'this account isn\'t active','type':type})
 
